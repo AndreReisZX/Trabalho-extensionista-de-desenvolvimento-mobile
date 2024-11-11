@@ -1,0 +1,359 @@
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  StyleSheet,
+  Linking,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import * as Location from 'expo-location';
+
+const Stack = createStackNavigator();
+
+const services = [
+  { id: '1', name: 'Reboque Leve', icon: 'car', isLarge: true },
+  { id: '2', name: 'Trocar Pneu', icon: 'circle' },
+  { id: '3', name: 'Bateria', icon: 'battery-full' },
+  { id: '4', name: 'Combustível', icon: 'tint' },
+  { id: '5', name: 'Táxi', icon: 'car' },
+  { id: '6', name: 'Utilitário', icon: 'truck' },
+  { id: '7', name: 'Semi Pesado', icon: 'truck' },
+  { id: '8', name: 'Maquinário', icon: 'cogs' },
+  { id: '9', name: 'Chaveiro', icon: 'key' },
+];
+
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="LoginScreen">
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ServiceScreen" component={ServiceScreen} options={{ headerShown: false }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+const LoginScreen = ({ navigation }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    if (!username || !password) {
+      Alert.alert('Erro', 'Todos os campos são obrigatórios.');
+      return;
+    }
+    navigation.navigate('ServiceScreen');
+  };
+
+  return (
+    <View style={styles.login.container}>
+      <View style={styles.login.titleContainer}>
+        <Text style={styles.login.title}>Guerra</Text>
+        <Text style={styles.login.subTitle}>Reboque</Text>
+      </View>
+      <View style={styles.login.inputContainer}>
+        <Icon name="user" size={20} color="#fff" />
+        <TextInput
+          style={styles.login.input}
+          placeholder="Usuário"
+          placeholderTextColor="#aaa"
+          value={username}
+          onChangeText={setUsername}
+        />
+      </View>
+      <View style={styles.login.inputContainer}>
+        <Icon name="lock" size={20} color="#fff" />
+        <TextInput
+          style={styles.login.input}
+          placeholder="Senha"
+          placeholderTextColor="#aaa"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
+      <TouchableOpacity style={styles.login.button} onPress={handleLogin}>
+        <Text style={styles.login.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+      <Text style={styles.login.link} onPress={() => Alert.alert('Redirecionar para recuperação de senha')}>
+        Esqueceu a senha?
+      </Text>
+      <Text style={styles.login.link} onPress={() => navigation.navigate('SignUpScreen')}>
+        Criar conta
+      </Text>
+    </View>
+  );
+};
+
+const SignUpScreen = ({ navigation }) => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [cnh, setCnh] = useState('');
+  const [plate, setPlate] = useState('');
+
+  const handleSignUp = () => {
+    if (!username || !email || !password || !confirmPassword || !cpf || !cnh || !plate) {
+      Alert.alert('Erro', 'Todos os campos são obrigatórios.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não correspondem.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert('Erro', 'Por favor, insira um email válido.');
+      return;
+    }
+    if (cpf.length !== 11 || !/^\d+$/.test(cpf)) {
+      Alert.alert('Erro', 'O CPF deve ter 11 números.');
+      return;
+    }
+    if (cnh.length !== 11 || !/^\d+$/.test(cnh)) {
+      Alert.alert('Erro', 'A CNH deve ter 11 números.');
+      return;
+    }
+    if (plate.length !== 17) {
+      Alert.alert('Erro', 'A placa do veículo deve ter 17 caracteres.');
+      return;
+    }
+    Alert.alert('Sucesso', 'Conta criada com sucesso!');
+    navigation.navigate('LoginScreen');
+  };
+
+  return (
+    <View style={styles.signup.container}>
+      <View style={styles.signup.titleContainer}>
+        <Text style={styles.signup.title}>Guerra</Text>
+        <Text style={styles.signup.subTitle}>Reboque</Text>
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="user" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="Usuário"
+          placeholderTextColor="#aaa"
+          value={username}
+          onChangeText={setUsername}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="envelope" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="Email"
+          placeholderTextColor="#aaa"
+          value={email}
+          onChangeText={setEmail}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="id-card" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="CPF"
+          placeholderTextColor="#aaa"
+          keyboardType="numeric"
+          maxLength={11}
+          value={cpf}
+          onChangeText={setCpf}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="id-card" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="CNH"
+          placeholderTextColor="#aaa"
+          keyboardType="numeric"
+          maxLength={11}
+          value={cnh}
+          onChangeText={setCnh}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="car" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="Placa do veículo"
+          placeholderTextColor="#aaa"
+          maxLength={17}
+          value={plate}
+          onChangeText={setPlate}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="lock" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="Senha"
+          placeholderTextColor="#aaa"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
+      <View style={styles.signup.inputContainer}>
+        <Icon name="lock" size={20} color="#fff" />
+        <TextInput
+          style={styles.signup.input}
+          placeholder="Confirmar Senha"
+          placeholderTextColor="#aaa"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+      </View>
+      <TouchableOpacity style={styles.signup.button} onPress={handleSignUp}>
+        <Text style={styles.signup.buttonText}>Criar conta</Text>
+      </TouchableOpacity>
+      <Text style={styles.signup.link} onPress={() => navigation.navigate('LoginScreen')}>
+        Voltar
+      </Text>
+    </View>
+  );
+};
+
+const ServiceScreen = () => {
+  const [location, setLocation] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const requestLocation = async (serviceName) => {
+    Alert.alert(
+      'Confirmar Serviço',
+      `Você deseja solicitar ${serviceName}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Confirmar', onPress: async () => {
+          setLoading(true);
+          await getLocation();
+          setLoading(false);
+        }},
+      ]
+    );
+  };
+
+  const getLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Erro', 'Permissão de localização não concedida.');
+      return;
+    }
+
+    let userLocation = await Location.getCurrentPositionAsync({});
+    setLocation(userLocation);
+    Alert.alert('Estimativa de Tempo', 'O serviço será realizado em aproximadamente 30 minutos.');
+  };
+
+  const footerIcons = [
+    {
+      name: 'whatsapp',
+      url: 'https://wa.me/5521976011899',
+    },
+    {
+      name: 'envelope',
+      url: 'mailto:lucasstraub7@hotmail.com',
+    },
+    {
+      name: 'phone',
+      url: 'tel:+5521976288922',
+    },
+  ];
+
+  return (
+    <View style={styles.service.container}>
+      <Image
+        source={{ uri: 'https://your-logo-url.com/logo.png' }}
+        style={styles.service.logo}
+      />
+      <View style={styles.service.titleContainer}>
+        <Text style={styles.service.title}>Guerra</Text>
+        <Text style={styles.service.subTitle}>Reboque</Text>
+      </View>
+      <View style={styles.service.serviceContainer}>
+        <View style={styles.service.row}>
+          <TouchableOpacity
+            key={services[0].id}
+            style={[styles.service.card, styles.service.largeCard, styles.service.reboqueCard]}
+            onPress={() => requestLocation(services[0].name)}
+          >
+            <Icon name={services[0].icon} size={30} />
+            <Text style={styles.service.largeCardText}>{services[0].name}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.service.grid}>
+          {services.slice(1).map(service => (
+            <TouchableOpacity
+              key={service.id}
+              style={styles.service.card}
+              onPress={() => requestLocation(service.name)}
+            >
+              <Icon name={service.icon} size={30} />
+              <Text style={styles.service.cardText}>{service.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+      {loading && <Text style={styles.service.loadingText}>Buscando localização...</Text>}
+      <View style={styles.service.footer}>
+        {footerIcons.map(icon => (
+          <TouchableOpacity key={icon.name} onPress={() => Linking.openURL(icon.url)} style={{ alignItems: 'center', marginHorizontal: 20 }}>
+            <Icon name={icon.name} size={30} color="#fff" />
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// Estilos
+const styles = {
+  login: StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#222' },
+    titleContainer: { marginBottom: 20},
+    title: { fontSize: 40, color: '#fff', fontWeight: '700' },
+    subTitle: { fontSize: 30, color: '#fff', marginTop: -10, marginLeft: 30 },
+    inputContainer: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: '#fff', marginBottom: 15, width: '80%' },
+    input: { flex: 1, color: '#fff', padding: 10 },
+    button: { backgroundColor: '#ff6347', padding: 10, borderRadius: 5, width: '80%', alignItems: 'center' },
+    buttonText: { color: '#fff', fontSize: 16 },
+    link: { color: '#fff', marginTop: 10 },
+  }),
+  signup: StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#222' },
+    titleContainer: { marginBottom: 20, marginTop: 40},
+    title: { fontSize: 40, color: '#fff', fontWeight: '700' },
+    subTitle: { fontSize: 30, color: '#fff', marginTop: -10, marginLeft: 30 },
+    inputContainer: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: '#fff', marginBottom: 15, width: '80%' },
+    input: { flex: 1, color: '#fff', padding: 10 },
+    button: { backgroundColor: '#ff6347', padding: 10, borderRadius: 5, width: '80%', alignItems: 'center' },
+    buttonText: { color: '#fff', fontSize: 16 },
+    link: { color: '#fff', marginTop: 10 },
+  }),
+  service: StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#222', padding: 20 },
+    titleContainer: { alignItems: 'center', marginBottom: 20, marginTop: 40 },
+    title: { fontSize: 40, color: '#fff', fontWeight: '700' },
+    subTitle: { fontSize: 30, color: '#fff', marginTop: -10, marginLeft: 60 },
+    serviceContainer: { flex: 1 },
+    row: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
+    card: { backgroundColor: '#444', borderRadius: 10, padding: 20, margin: 10, alignItems: 'center', flexDirection: 'column', width: '40%' },
+    largeCard: { width: '80%' },
+    largeCardText: { color: '#fff', fontSize: 19, fontWeight: 'bold', marginTop: 10 },
+    cardText: { color: '#fff', marginTop: 5, fontSize: 15, fontWeight: 'bold' },
+    loadingText: { color: '#fff', textAlign: 'center', marginTop: 10 },
+    footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
+  }),
+};
+
+export default App;
